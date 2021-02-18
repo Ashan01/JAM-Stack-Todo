@@ -7,7 +7,7 @@ const typeDefs = gql`
       todos: [TodosType!]
    }
    type Mutation {
-      type: addTodos: (task: String!):TodosType
+      addTodos(task: String!): TodosType
    }
    type TodosType {
       id: ID!
@@ -43,13 +43,23 @@ const resolvers = {
       },
    },
    Mutation: {
-      addTodos: (_, { task }) => {
-         q.Create(q.Collection("todo"), {
-            data: {
-               task: task,
-               status: true,
-            },
-         });
+      addTodos: async (_, { task }) => {
+         try {
+            var adminClient = new faunadb.Client({
+               secret: "fnAEB3hd3mACCa_qf9kBGxoYuC9Zw7kmHPvz3xSG",
+            });
+            const result = await adminClient.query(
+               q.Create(q.Collection("todo"), {
+                  data: {
+                     task: task,
+                     status: true,
+                  },
+               })
+            );
+            return result.ref.data;
+         } catch (err) {
+            console.log(err);
+         }
       },
    },
 };
@@ -59,6 +69,4 @@ const server = new ApolloServer({
    resolvers,
 });
 
-const handler = server.createHandler();
-
-module.exports = { handler };
+exports.handler = server.createHandler();
