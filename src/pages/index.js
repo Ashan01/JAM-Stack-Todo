@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import gql from "graphql-tag";
 
@@ -8,20 +8,31 @@ export default function Home() {
          todos {
             id
             task
-            status
          }
       }
    `;
-   const ADD_TODO = gql`{
-      mutation addTodos($task: String! )=>{
-          addTodos(task : $task){
-             task
-          }
-      }
-   }`;
 
-   let data = useRef();
+   const ADD_TODO = gql`
+      mutation addTodos($task: String!) {
+         addTodos(task: $task) {
+            task
+         }
+      }
+   `;
+
+   let inputText;
+
    const [addTodos] = useMutation(ADD_TODO);
+   // const handleSubmit = () => {
+   //    addTodos({
+   //       variables: {
+   //          task: inputText.value,
+   //       },
+   //       refetchQueries: [{ query: GET_TODOS }],
+   //    });
+   //    inputText.value = "";
+   // };
+
    const { loading, error, data } = useQuery(GET_TODOS);
 
    if (loading) return <h2>Loading..</h2>;
@@ -32,15 +43,15 @@ export default function Home() {
    }
 
    console.log(data);
-
-   const handleSubmit = () => {
-      return addTodos({
-         task: data.current.value,
-      });
-   };
    return (
       <div>
-         <input type="text" ref={data} />
+         <input
+            type="text"
+            ref={(node) => {
+               inputText = node;
+            }}
+         />
+         <button onClick={handleSubmit}>Add</button>
       </div>
    );
 }

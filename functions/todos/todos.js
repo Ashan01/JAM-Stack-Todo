@@ -46,7 +46,7 @@ const resolvers = {
       addTodos: (_, { task }) => {
          q.Create(q.Collection("todo"), {
             data: {
-               task,
+               task: task,
                status: true,
             },
          });
